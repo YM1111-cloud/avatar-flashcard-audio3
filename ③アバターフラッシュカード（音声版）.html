@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>アバター 第3章 フラッシュカード（音声版）</title>
+ <style>
+ body {
+ font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+ background-color: #f7f9fc;
+ color: #333333;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ padding: 20px;
+ margin: 0;
+ }
+
+ h1 {
+ font-size: 1.5rem;
+ color: #2c3e50;
+ margin-bottom: 10px;
+ }
+
+ .global-controls {
+ display: flex;
+ gap: 10px;
+ width: 100%;
+ max-width: 600px;
+ justify-content: space-between;
+ margin-bottom: 15px;
+ }
+
+ .global-btn {
+ flex: 1;
+ padding: 10px;
+ font-size: 0.95rem;
+ border: none;
+ border-radius: 8px;
+ cursor: pointer;
+ font-weight: bold;
+ background-color: #edf2f7;
+ color: #2d3748;
+ transition: background-color 0.2s;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+ }
+
+ .global-btn:hover {
+ background-color: #e2e8f0;
+ }
+
+ .header-stats {
+ display: flex;
+ justify-content: space-between;
+ width: 100%;
+ max-width: 600px;
+ margin-bottom: 15px;
+ font-size: 1.1rem;
+ font-weight: bold;
+ color: #555;
+ padding: 0 10px;
+ }
+
+ #flashcard {
+ background-color: #ffffff;
+ width: 100%;
+ max-width: 600px;
+ min-height: 400px;
+ border-radius: 16px;
+ box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ padding: 30px;
+ box-sizing: border-box;
+ text-align: center;
+ position: relative;
+ }
+
+ #front-side {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ width: 100%;
+ height: 100%;
+ }
+
+ #play-audio-btn {
+ font-size: 4rem;
+ padding: 30px;
+ border-radius: 50%;
+ background-color: #4a90e2;
+ color: white;
+ border: none;
+ cursor: pointer;
+ box-shadow: 0 6px 12px rgba(74, 144, 226, 0.3);
+ transition: transform 0.1s, background-color 0.2s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 120px;
+ height: 120px;
+ margin-bottom: 15px;
+ }
+
+ #play-audio-btn:active {
+ transform: scale(0.95);
+ background-color: #357abd;
+ }
+ 
+.hint-text {
+ color: #888;
+ font-size: 0.9rem;
+ margin-bottom: 25px;
+ }
+
+ .last-date-badge {
+ background-color: #f0f4f8;
+ color: #4a5568;
+ padding: 8px 16px;
+ border-radius: 20px;
+ font-size: 0.85rem;
+ font-weight: bold;
+ border: 1px solid #e2e8f0;
+ }
+
+ #back-side {
+ display: none;
+ width: 100%;
+ text-align: left;
+ }
+
+ .english-text {
+ font-size: 1.4rem;
+ font-weight: bold;
+ color: #1a1a1a;
+ margin-bottom: 15px;
+ border-bottom: 2px solid #e1e8ed;
+ padding-bottom: 10px;
+ }
+
+ .japanese-text {
+ font-size: 1.1rem;
+ color: #4a4a4a;
+ margin-bottom: 20px;
+ line-height: 1.6;
+ }
+
+ .note-box {
+ background-color: #fff9e6;
+ border-left: 4px solid #f5a623;
+ padding: 15px;
+ border-radius: 4px;
+ font-size: 1rem;
+ line-height: 1.6;
+ color: #5c4716;
+ }
+
+ .controls {
+ display: flex;
+ gap: 10px;
+ margin-top: 30px;
+ width: 100%;
+ max-width: 600px;
+ justify-content: center;
+ }
+
+ .action-btn {
+ flex: 1;
+ padding: 15px 10px;
+ font-size: 1rem;
+ border: none;
+ border-radius: 8px;
+ cursor: pointer;
+ font-weight: bold;
+ transition: background-color 0.2s, opacity 0.2s;
+ }
+
+ .action-btn:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ }
+
+ #prev-btn { background-color: #e2e8f0; color: #4a5568; }
+ #flip-btn { background-color: #4a90e2; color: white; }
+ #next-btn { background-color: #e2e8f0; color: #4a5568; }
+
+ .eval-btn {
+ flex: 1;
+ padding: 15px 10px;
+ font-size: 1.2rem;
+ border: none;
+ border-radius: 8px;
+ cursor: pointer;
+ font-weight: bold;
+ color: white;
+ }
+
+ #wrong-btn { background-color: #e74c3c; }
+ #wrong-btn:hover { background-color: #c0392b; }
+ 
+#correct-btn { background-color: #2ecc71; }
+ #correct-btn:hover { background-color: #27ae60; }
+ </style>
+</head>
+<body>
+
+ <h1>🎧 アバター 第3章 フラッシュカード（音声版）</h1>
+
+ <div class="global-controls">
+ <button id="mode-btn" class="global-btn" onclick="toggleFilterMode()">全問モード中 (タップで未正解のみ)</button>
+ <button id="first-btn" class="global-btn" onclick="goToFirst()">⏮ 1問目に戻る</button>
+ </div>
+
+ <div class="header-stats">
+ <span id="progress-text">1 / 115</span>
+ <span id="score-text">正解数: 0</span>
+ </div>
+
+ <div id="flashcard">
+ <div id="front-side">
+ <button id="play-audio-btn">▶️</button>
+ <p class="hint-text">タップして英語の音声を聴く</p>
+ <div class="last-date-badge" id="last-date-text">最終回答日: 未回答</div>
+ </div>
+
+ <div id="back-side">
+ <div class="english-text" id="eng-content"></div>
+ <div class="japanese-text" id="jap-content"></div>
+ <div class="note-box" id="note-content"></div>
+ </div>
+ </div>
+
+ <div class="controls" id="controls-front">
+ <button id="prev-btn" class="action-btn" onclick="prevCard()">◀ 前へ</button>
+ <button id="flip-btn" class="action-btn" onclick="flipCard()">🔄 裏返す</button>
+ <button id="next-btn" class="action-btn" onclick="nextCard()">次へ ▶</button>
+ </div>
+
+ <div class="controls" id="controls-back" style="display: none;">
+ <button id="wrong-btn" class="eval-btn" onclick="markIncorrect()">❌ 覚えてない</button>
+ <button id="correct-btn" class="eval-btn" onclick="markCorrect()">◯ 完璧！</button>
+ </div>
+
+ <script>
+ const cardsData = [
+  {"en": "Water...", "jp": "水。", "note": ""},
+  {"en": "Earth...", "jp": "土。", "note": ""},
+  {"en": "Fire...", "jp": "火。", "note": ""},
+  {"en": "Air...", "jp": "気。", "note": ""},
+  {"en": "Long ago, the four nations lived together in harmony.", "jp": "遥か昔、4つの国々は調和の中で共に暮らしていた。", "note": "in harmony（調和して、仲良く）は人間関係や社会の平穏を表す美しい表現。"},
+  {"en": "Then, everything changed when the Fire Nation attacked.", "jp": "だが、火の国が攻撃を仕掛けてきたとき、すべてが変わってしまった。", "note": "世界観の転換を示す決定的な過去形表現。"},
+  {"en": "Only the Avatar, master of all four elements, could stop them.", "jp": "4つのエレメントすべてを操るマスターであるアバターだけが彼らを止めることができた。", "note": "master（～を極めた者、達人）。"},
+  {"en": "But when the world needed him most, he vanished.", "jp": "だが、世界が最も彼を必要としたとき、彼は姿を消した。", "note": "vanish（跡形もなく消え去る）。"},
+  {"en": "A hundred years passed and my brother and I discovered the new Avatar,", "jp": "100年が過ぎ、兄と私は新しいアバターを発見した。", "note": "discover（発見する）。"},
+  {"en": "an airbender named Aang,", "jp": "アンという名のエアベンダーを。", "note": "named Aang（アンという名の、アンと名付けられた）は過去分詞による後置修飾。"},
+  {"en": "and although his airbending skills are great,", "jp": "彼のエアベンディングの技術は素晴らしいけれど、", "note": "although（～だけれども）は though よりもフォーマルな接続詞。"},
+  {"en": "he has a lot to learn before he's ready to save anyone.", "jp": "私たち（誰か）を救う準備が整う前に、彼はまだ多くのことを学ばなければならない。", "note": "第2話の save us から、第3話では save anyone（誰かを救う）へと変化しています。have a lot to learn「学ぶべきことがたくさんある」。"},
+  {"en": "But I believe Aang can save the world.", "jp": "それでも私は信じている。アンが世界を救ってくれると。", "note": ""},
+  {"en": "BOOK ONE: WATER", "jp": "第一巻：水の書", "note": ""},
+  {"en": "CHAPTER THREE: THE SOUTHERN AIR TEMPLE", "jp": "第3章：南の気の寺", "note": ""},
+  {"en": "Wait till you see it, Katara.", "jp": "カタラ、見るのを楽しみにしておいて。", "note": "Wait till you see... は「～を見るまで待って」から転じて、「見たら驚くよ」「楽しみにしていなさい」という意味の日常で非常によく使われる口語表現。"},
+  {"en": "The Air Temple is one of the most beautiful places in the world.", "jp": "空の寺院は、世界で最も美しい場所の一つなんだ。", "note": ""},
+  {"en": "Aang, I know you're excited, but it's been a hundred years since you've been home.", "jp": "アン、ワクワクするのは分かるけれど、あなたが故郷に帰るのは100年ぶりなのよ。", "note": "It has been [期間] since [過去の出来事 / 完了した状態] で「～が経つ、～ぶりだ」を表す重要文法。"},
+  {"en": "That's why I'm so excited.", "jp": "だからこそ、こんなに楽しみなんだよ。", "note": "That's why...「それが～の理由だ、だからこそ～だ」。"},
+  {"en": "It's just that a lot can change in all that time.", "jp": "ただ、それだけの長い年月の間には、多くのことが変わり得るってことよ。", "note": "It's just that... は「ただ単に～なだけだ」と、相手の意見を尊重しつつ、やんわりと別の懸念や事実を伝える時に便利な表現。can は潜在的な可能性（～し得る）を指します。"},
+  {"en": "I know, but I need to see it for myself.", "jp": "分かってる、でも自分の目で確かめなきゃいけないんだ。", "note": "for myself「自分自身で、自分の目で（他人に頼らず直接）」。"},
+  {"en": "Wake up, Sokka. Air Temple, here we come!", "jp": "起きて、ソッカ。空の寺院へ、いよいよ到着だよ！", "note": "here we come は「今そっちに行くぞ！」「いよいよお目見えだ！」というワクワク感を伴う移動の定番フレーズ。"},
+  {"en": "Sleep now, temple later.", "jp": "今は寝る、寺は後だ。", "note": "動詞や名詞をポンポンと並べた極めてカジュアルな省略表現。"},
+  {"en": "Sokka, wake up! There's a prickle snake in your sleeping bag!", "jp": "ソッカ、起きて！ 寝袋の中にトゲヘビがいるよ！", "note": "sleeping bag「寝袋」。ソッカを叩き起こすための、アンのユーモラスな「嘘」です。"},
+  {"en": "Get it off!", "jp": "取り除け！（どかせ！）", "note": "Get [何か] off は、体に這いつくばった虫や汚れなどを「取ってくれ！」「退けてくれ！」とパニックになって叫ぶときの鉄板フレーズ。"},
+  {"en": "Great, you're awake. Let's go.", "jp": "よし、起きたね。行こう。", "note": "Great, you're awake. は、相手を騙して起こすことに成功した時のいたずらっぽいセリフ。"},
+  {"en": "Uncle, I want the repairs made as quickly as possible.", "jp": "叔父上、修理はできる限り早く済ませたい。", "note": "want + 目的語 + 過去分詞 で「（目的語）を～された状態にしたい」という使役的な希望を表す重要パターン。as quickly as possible「できるだけ早く」。"},
+  {"en": "I don't want to stay too long and risk losing his trail.", "jp": "長居して奴の足跡（手がかり）を見失う危険を冒したくない。", "note": "risk + -ing は「～する危険を冒す」という、中級必須の動詞用法。lose one's trail「（追跡対象の）足跡・手がかりを見失う」。"},
+  {"en": "You mean the Avatar?", "jp": "アバターのことですかな？", "note": ""},
+  {"en": "Don't mention his name on these docks.", "jp": "このドック（港）で奴の名を口にするな。", "note": "mention は「～について言及する、口にする」。"},
+  {"en": "Once word gets out that he's alive, every firebender will be out looking for him,", "jp": "奴が生きているという噂が一度でも漏れれば、すべての火の国のベンダーが奴を探しに出回るだろう。", "note": "Once...（接続詞）「一度～すれば」。word gets out that... は「～という噂が広まる、情報が世間に漏れる」という日常・ビジネスの超重要表現。"},
+  {"en": "and I don't want anyone getting in the way.", "jp": "そして、誰にも邪魔をされたくないのだ。", "note": "get in the way は「邪魔をする、進路を遮る」という極めて実用的な句動詞。"},
+  {"en": "Getting in the way of what, Prince Zuko?", "jp": "何の邪魔をされたくないと？ ズコ王子。", "note": ""},
+  {"en": "Captain Zhao.", "jp": "ジャオ大尉。", "note": ""},
+  {"en": "It's Commander now.", "jp": "今は「指揮官（司令官）」だ。", "note": "Commander。大尉（Captain）から昇進したことをズコに見せびらかし、優位に立とうとしています。"},
+  {"en": "And General Iroh,", "jp": "そしてアイロー将軍、", "note": ""},
+  {"en": "great hero of our nation.", "jp": "我が国の偉大なる英雄。", "note": ""},
+  {"en": "Retired General.", "jp": "退職した（隠居した）将軍ですぞ。", "note": "retired「退役した、隠居した」。アイローは謙虚に、かつ過去の栄光に縛られない姿勢を見せています。"},
+  {"en": "The Fire Lord's brother and son are welcome guests anytime.", "jp": "火の国の主（お父上）の弟君とご子息は、いつでも歓迎すべき賓客だ。", "note": "welcome guest「歓迎される客」。"},
+  {"en": "What brings you to my harbor?", "jp": "私の港に一体どのようなご用件で？", "note": "What brings you to...? は「どうしてここに来たのですか？」を品よく尋ねる無生物主語構文の定番。"},
+  {"en": "Our ship is being repaired.", "jp": "船が修理中なのだ。", "note": "is being repaired「修理されている最中だ」（現在進行形の受動態）。"},
+  {"en": "That's quite a bit of damage.", "jp": "ずいぶんと酷い損傷ですな。", "note": "quite a bit of...「かなりの、少なからぬ量の」。"},
+  {"en": "Yes. You wouldn't believe what happened.", "jp": "ああ。何が起きたか、お前には信じられないだろう。", "note": "You wouldn't believe...「～だなんてとても信じられないだろう」と、事の大きさを強調する表現。"},
+  {"en": "Uncle, tell Commander Zhao what happened.", "jp": "叔父上、ジャオ指揮官に何があったか説明してくれ。", "note": ""},
+  {"en": "Yes, I will do that.", "jp": "ああ、そうしましょう。", "note": ""},
+  {"en": "It was incredible.", "jp": "実に信じがたい出来事でした。", "note": ""},
+  {"en": "What, did we crash or something?", "jp": "何だ、衝突でもしたのか？", "note": "or something「～か何か」。ズコたちの操船技術を馬鹿にしています。"},
+  {"en": "Yes, right into an Earth Kingdom ship.", "jp": "そうなんです、土の国の軍艦に真っ直ぐ衝突してしまいましてな。", "note": "right into...「～へ真っ直ぐ、まともに」。アイローはアバターにやられた事実を隠すため、とぼけて言い訳をしています。"},
+  {"en": "Really?", "jp": "本当にか？", "note": ""},
+  {"en": "You must regale me with all the thrilling details.", "jp": "そのスリリングな詳細を、ぜひ私に聞かせて楽しませてくれなくては。", "note": "regale A with B「AをB（お話やご馳走など）でもてなす、楽しませる」という少し気取った表現。"},
+  {"en": "Join me for a drink?", "jp": "一杯付き合わないか？", "note": ""},
+  {"en": "Sorry, but we have to go.", "jp": "悪いが、失礼する。", "note": ""},
+  {"en": "Prince Zuko, show Commander Zhao your respect.", "jp": "ズコ王子、ジャオ指揮官に対して敬意を示しなさい。", "note": ""},
+  {"en": "We would be honored to join you.", "jp": "ご一緒させていただければ光栄です。", "note": "would be honored to...「～させていただければ光栄に思います」。助動詞 would を使った非常に丁寧な仮定法表現。"},
+  {"en": "Do you have any ginseng tea? It's my favorite.", "jp": "高麗人参のお茶はありますかな？ 私の大好物でしてね。", "note": "ginseng tea「高麗人参茶」。お茶好きのアイローならではの注文。"},
+  {"en": "Hey, stomach be quiet, all right? I'm trying to find us some food.", "jp": "おい、お腹、静かにしてくれよな？ 俺たちに何か食べ物を探そうとしてるんだから。", "note": "stomach be quiet は自分のお腹（stomach）に向けて命令形を使っているコミカルなぼやき。"},
+  {"en": "Hey, who ate all my blubbered seal jerky?", "jp": "おい、俺のアザラシの脂肪漬けジャーキーを全部食ったのは誰だ？", "note": "blubbered seal jerky はアザラシの脂身（blubber）のジャーキー。ウォーター部族特有のスタミナ保存食。"},
+  {"en": "Oh, that was food?", "jp": "あれって食べ物だったの？", "note": ""},
+  {"en": "I used it to start the campfire last night. Sorry.", "jp": "昨日の夜、焚き火の火種（着火剤）に使っちゃったよ。ごめん。", "note": "start the campfire「焚き火の火を起こす」。脂身が多いため、よく燃える火種に最適だったというアンの無邪気な大失敗。"},
+  {"en": "You what?", "jp": "何だって！？", "note": "You what? は相手の信じられない行動や発言を聞き返す時の強い驚きのカジュアル表現。「お前、何したって？」"},
+  {"en": "No wonder the flame smelled so good.", "jp": "どうりで炎がすっごく良い匂いだったわけね。", "note": "No wonder... は「～なのも不思議ではない、どうりで～なわけだ」という日常会話の超頻出表現。"},
+  {"en": "The Patola Mountain range! We're almost there!", "jp": "パトラ山脈だ！ もうすぐそこだよ！", "note": "almost there「もうすぐ到着する、もう一息だ」。"},
+  {"en": "Aang, before we get to the temple, I want to talk to you about the airbenders.", "jp": "アン、寺院に着く前に、エアベンダーたちのことについて話しておきたいの。", "note": ""},
+  {"en": "-What about them? -Well...", "jp": "- 仲間のこと？どうしたの？ - ええと…", "note": ""},
+  {"en": "I just want you to be prepared for what you might see.", "jp": "ただ、これから目にするかもしれないものに対して、心の準備をしておいてほしいの。", "note": "be prepared for...「～の準備（覚悟）ができている」。what you might see「あなたが目にするかもしれないもの」（関係代名詞 what の名詞節）。"},
+  {"en": "The Fire Nation is ruthless.", "jp": "火の国は無慈悲（冷酷）よ。", "note": "ruthless「冷酷な、一切の容赦がない」。中級必須の重要形容詞。"},
+  {"en": "They killed my mother, and they could have done the same to your people.", "jp": "私の母も彼らに殺されたわ。そして、あなたの仲間たちにも同じことをした可能性があるの。", "note": "could have + 過去分詞「～したかもしれない、～した可能性があった」（過去の状況に対する可能性・推量）。"},
+  {"en": "Just because no one has seen an airbender", "jp": "誰もエアベンダーを見ていないからといって、", "note": ""},
+  {"en": "doesn't mean the Fire Nation killed them all. They probably escaped.", "jp": "火の国が彼らを全員殺したことにはならないよ。きっとみんな逃げ出したんだ。", "note": "Just because A doesn't mean B「単にAだからといって、Bというわけではない」という極めて実用的な構文。"},
+  {"en": "I know it's hard to accept.", "jp": "（現実を）受け入れるのがつらいのは分かるわ。", "note": "hard to accept「受け入れるのが難しい、受け入れがたい」。"},
+  {"en": "You don't understand, Katara.", "jp": "カタラ、君は分かってないよ。", "note": ""},
+  {"en": "The only way to get to an airbender temple is on a flying bison.", "jp": "エアベンダーの寺院に行く唯一の方法は、空飛ぶバイソンに乗ることなんだ。", "note": "The only way to [動詞] is on/by [手段]「～する唯一の方法は…だ」。"},
+  {"en": "I doubt the Fire Nation has any flying bison, right, Appa?", "jp": "火の国が空飛ぶバイソンを持ってるなんて、僕には思えないな。そうだよね、アッパ？", "note": "I doubt...「～ではないと思う、～を疑う」。I don't think よりも「そうである可能性は極めて低いと懐疑的に思っている」というニュアンス。"},
+  {"en": "Yip, yip!", "jp": "ヤップ、ヤップ！", "note": ""},
+  {"en": "There it is, the Southern Air Temple.", "jp": "見えた、南の気の寺だ。", "note": ""},
+  {"en": "Aang, it's amazing.", "jp": "アン、素晴らしい場所ね。", "note": ""},
+  {"en": "We're home, buddy. We're home.", "jp": "帰ってきたぞ、相棒。僕たちの家にね。", "note": ""},
+  {"en": "And by year's end, the Earth Kingdom capital will be under our rule.", "jp": "そして年末までには、土の国の首都は我が国の支配下に入るだろう。", "note": "by year's end「年末までに」。under our rule「我々の支配下に、統治下に」。"},
+  {"en": "The Fire Lord will finally claim victory in this war.", "jp": "火の国の王（火祖）はついにこの戦争での勝利を宣言するのだ。", "note": "claim victory「勝利を勝ち取る、勝利を宣言する、主張する」。"},
+  {"en": "If my father thinks the rest of the world will follow him willingly,", "jp": "もし父上が、世界の他の国々が自ら進んで自分に従うと思っているなら、", "note": "willingly「快く、進んで、自発的に」。"},
+  {"en": "then he is a fool.", "jp": "それは愚か者というものだ。", "note": ""},
+  {"en": "Two years at sea have done little to temper your tongue.", "jp": "2年間の海上生活も、お前のその荒い口の利き方を和らげる役には立たなかったようだな。", "note": "do little to...「～するのにはほとんど役に立たない、効果がない」（little は準否定）。temper one's tongue「（不遜な）言葉遣いや口の利き方を抑える、和らげる、慎む」。"},
+  {"en": "So, how is your search for the Avatar going?", "jp": "それで、アバターの捜索は順調かね？", "note": "How is [何か] going?「～の進捗はどうですか？ 順調ですか？」は、日常会話でプロジェクトの進捗や近況を聞く定番フレーズ。"},
+  {"en": "My fault entirely.", "jp": "完全に私の責任でしてな。", "note": "My fault entirely.「全面的に私の落ち度（責任）です」。ズコをかばうためにアイローが先手を打ってとぼけています。"},
+  {"en": "We haven't found him yet.", "jp": "まだ見つけられていないのです。", "note": ""},
+  {"en": "Did you really expect to?", "jp": "本当に見つかると期待していたのかね？", "note": "expect to [find him] の find him が省略されています。「本気で見つけられると思っていたのか？」という皮肉。"},
+  {"en": "The Avatar died a hundred years ago, along with the rest of the airbenders.", "jp": "アバターは100年前に、他のエアベンダーたちと共に死んだのだ。", "note": "along with...「～と一緒に、～に加えて」。"},
+  {"en": "Unless you found some evidence that the Avatar is alive?", "jp": "それとも、アバターが生きているという何らかの証拠でも見つけたのかな？", "note": "Unless...「～でない限りは、～なら話は別だが」。"},
+  {"en": "No. Nothing.", "jp": "いや。何もない。", "note": ""},
+  {"en": "Prince Zuko, the Avatar is the only one", "jp": "ズコ王子、アバターは唯一無二の存在なのだ。", "note": ""},
+  {"en": "who can stop the Fire Nation from winning this war.", "jp": "我が火の国がこの戦争に勝利するのを阻止できるのはな。", "note": "stop [人] from -ing「（人）が～するのを妨げる、阻止する」という、非常に重要度の高い表現。"},
+  {"en": "If you have an ounce of loyalty left, you'll tell me what you've found.", "jp": "もしお前に、ひとかけらでも忠誠心が残っているなら、何を見つけたのか私に話すがいい。", "note": "an ounce of...「1オンス（ごくわずか）の～」。否定文や条件文で「微塵の～、少しの～」を強調する表現。"},
+  {"en": "I haven't found anything.", "jp": "何も見つけてなどいない。", "note": ""},
+  {"en": "It's like you said, the Avatar probably died a long time ago.", "jp": "お前が言った通り、アバターはおそらくずっと昔に死んだのだろう。", "note": "It's like you said「お前の言う通りだ」。"},
+  {"en": "Come on, Uncle, we're going.", "jp": "行こう、叔父上。引き上げるぞ。", "note": ""},
+  {"en": "Commander Zhao, we interrogated the crew as you instructed.", "jp": "ジャオ指揮官、ご指示通り乗組員に尋問を行いました。", "note": "interrogate「（警察や軍隊が容疑者や部下に）尋問する、厳しく問い詰める」。as you instructed「あなたが指示した通りに」。"},
+  {"en": "They confirmed Prince Zuko had the Avatar in custody but let him escape.", "jp": "乗組員は、ズコ王子がアバターを一時拘束していたものの、逃がしてしまった事実を確認しました。", "note": "have [人] in custody「（人）を拘留中である、監禁している」。let [人] escape「（人）を逃がしてやる、逃走を許す」。"},
+  {"en": "Now remind me,", "jp": "さて、改めて教えてもらおうか。", "note": "remind me「（忘れたので）思い出させてくれ、もう一度教えてくれ」。ここでは知っている事実を突きつける前の意地悪な前置き。"},
+  {"en": "how exactly was your ship damaged?", "jp": "一体全体、お前たちの船はどのようにして損傷したのかな？", "note": "how exactly「正確にはどのようにして」。逃げ場を失ったズコへの冷酷な追及です。"},
+  {"en": "So, where do I get something to eat?", "jp": "それで、どこに行けば食べるものが手に入るんだ？", "note": ""},
+  {"en": "You're lucky enough to be one of the first outsiders", "jp": "あなたは、空の寺院を訪れることができる最初の部外者の一人になれて、", "note": ""},
+  {"en": "to ever visit an airbender temple, and all you can think about is food?", "jp": "本当に幸運なのよ。それなのに、考えていることと言えば食べ物のことだけなの？", "note": "be lucky enough to...「～できるほど十分に幸運である」。all you can think about is...「あなたが考えているすべては～だけだ」（＝～のことしか頭にない）。"},
+  {"en": "I'm just a simple guy with simple needs.", "jp": "俺はシンプルな欲求を持った、ただのシンプルな男なんだよ。", "note": "simple needs「素朴な、単純な必要性（食欲など）」。ソッカの現実的で少し抜けたキャラクターがよく表れたセリフ。"},
+  {"en": "So that's where my friends and I would play airball,", "jp": "あそこが、僕と友達がよく「エアボール」で遊んだ場所で、", "note": "would は過去の不規則な習慣「よく～したものだった」を表します。"},
+  {"en": "and over there is where the bison would sleep and...", "jp": "そして向こうが、バイソンたちがよく眠っていた場所だよ、それから…", "note": ""},
+  {"en": "What's wrong?", "jp": "どうしたの？", "note": ""},
+  {"en": "This place used to be full of monks and lemurs and bison.", "jp": "この場所は、かつて僧侶やキツネザルやバイソンたちで溢れていたんだ。", "note": "used to be「かつて～だった（今は違う）」。be full of...「～で満ちている、いっぱいであった」。"},
+  {"en": "Now there's just a bunch of weeds.", "jp": "なのに今は、雑草が茂っているだけだ。", "note": "a bunch of...「一房の、一連の、たくさんの」。ここでは生い茂る雑草（weeds）を指しています。"},
+  {"en": "I can't believe how much things have changed.", "jp": "どんなに多くのことが変わってしまったのか、信じられないよ。", "note": "how much things have changed「状況がどれほど劇的に変わってしまったか」（現在完了形を用いて、過去から現在の変化を強調）。"},
+  {"en": "So this airball game, how do you play?", "jp": "それで、その「エアボール」ってゲーム、どうやって遊ぶんだ？", "note": "気落ちするアンを励ますため、ソッカが気を遣って話題を遊びに切り替えています。ソッカの優しさが伺えます。"},
+  {"en": "Aang seven, Sokka zero.", "jp": "アン、7点。ソッカ、0点。", "note": ""},
+  {"en": "Making him feel better is putting me in a world of hurt.", "jp": "あいつを元気にしてやるのは、俺にとっては「地獄の苦しみ」だな。", "note": "make [人] feel better「（人の）気分を良くしてあげる、元気づける」。put [人] in a world of hurt「（人を）極限の苦痛（精神的・肉体的）な状況に陥れる」という非常に面白い口語表現。エアボールでコテンパンに負けて体が痛いソッカのボヤキです。"},
+  {"en": "Katara, check this out.", "jp": "カタラ、これを見てくれ。", "note": "check this out「これを見て、確認して」（相手の注意を惹きつける時の超定番カジュアル表現）。"},
+  {"en": "Fire Nation.", "jp": "火の国のものだ（兜を発見して）。", "note": ""},
+  {"en": "We should tell him.", "jp": "あいつに伝えるべきだ。", "note": ""},
+  {"en": "Aang, there's something you need to see.", "jp": "アン、あなたに見せたいものがあるの（※ソッカを止め、気をそらそうと別のことを言います）。", "note": ""},
+  {"en": "Okay.", "jp": "わかった。", "note": ""},
+  {"en": "What is it?", "jp": "何だい？", "note": ""},
+  {"en": "Just a new waterbending move I learned.", "jp": "私が覚えた、新しいウォーターベンディングの技よ。", "note": "move「動作、技」。アンに火の国がここを侵略した事実（兜）を気づかせないための、カタラの咄嗟の嘘です。"},
+  {"en": "Nice one, but enough practicing. We have a whole temple to see.", "jp": "良い技だね、でも練習はそこまでにして。寺院を全部見て回らなきゃ。", "note": "Nice one!「やるね！素晴らしい！」。enough practicing「練習は十分だ、そのくらいにして」。a whole [名詞]「〜のすべて、丸ごと〜」。"},
+  {"en": "You know, you can't protect him forever.", "jp": "なあ、あいつを永遠に守り続けることはできないんだぞ。", "note": "protect [人] forever「（人を）永遠に保護する、真実を隠し続けることはできない」。ソッカの冷徹ながら現実的なアドバイス。"},
+  {"en": "Katara, firebenders were here. You can't pretend they weren't.", "jp": "カタラ、火の国の連中はここにいたんだ。いなかったフリをすることなんてできないぞ。", "note": "pretend (that) ...「〜のフリをする、～を装う」。中級必須の動詞。"},
+  {"en": "I can for Aang's sake.", "jp": "私はアンのために（いなかったフリを）するわ。", "note": "for Aang's sake / for one's sake「～のために、～の利益や感情を思って」。カタラのアンへの深い気遣いが現れています。"},
+  {"en": "If he finds out that the Fire Nation invaded his home, he'll be devastated.", "jp": "もし彼が、火の国が自分の故郷を侵略したと知ったら、完全に打ちのめされて（絶望して）しまうわ。", "note": "find out「（隠されていた情報などを）知る、見つけ出す」。devastated「（精神的に）途方に暮れた、絶望した、打ちのめされた」。"},
+  {"en": "Hey, guys, I want you to meet somebody.", "jp": "ねえ、みんな、誰かを紹介したいんだ。", "note": ""},
+  {"en": "Who's that?", "jp": "誰のことだ？", "note": ""},
+  {"en": "Monk Gyatso, the greatest airbender in the world.", "jp": "ギヤツォ師だよ。世界で一番偉大なエアベンダーなんだ。", "note": "Monk「僧侶、修道士」。"},
+  {"en": "He taught me everything I know.", "jp": "彼は僕が知っているすべてのことを教えてくれた。", "note": "everything I know の後ろに省略された関係代名詞 that があります。「僕のすべての知識・技術」というリスペクトの言葉。"},
+  {"en": "But the true secret is in the gooey center.", "jp": "だが、本当の秘密は、このとろりとした中心部（中身）にあるのだ。", "note": "（回想シーン）gooey「（ケーキや菓子などが）粘り気のある、トロッとした、ねっとりした」。"},
+  {"en": "My ancient cake baking technique", "jp": "わしの古代のケーキ焼きの技術だけが、", "note": ""},
+  {"en": "isn't the only thing on your mind, is it, Aang?", "jp": "お前の頭の中にある唯一のことではないな、アン？", "note": "on one's mind「（人が）気にかけている、頭を悩ませている」。ケーキ作りをしながら、アンの悩みに優しく気づくギヤツォ。"},
+  {"en": "This whole Avatar thing,", "jp": "この「アバター」という役割のことだけど…", "note": "This whole [名詞] thing「～に関するすべてのこと、～にまつわる一切のこと」という、やや面倒や複雑さをはらんだ物事をまとめて指す口語表現。"},
+  {"en": "maybe the monks made a mistake.", "jp": "もしかしたら、僧侶たちは間違いを犯した（僕をアバターに選んだのは間違いだ）んじゃないかな。", "note": "make a mistake「間違いを犯す」。自分が世界を救う重責を担うことへの不安。"},
+  {"en": "The only mistake they made was telling you before you turned 16.", "jp": "彼らが犯した唯一の過ちは、お前が16歳になる前にそれを教えてしまったことじゃ。", "note": "turn + 年齢「～歳になる」。通常、アバターの正体は16歳になるまで明かされない掟でした。"},
+  {"en": "But we can't concern ourselves with what was.", "jp": "だが、過去に起きたことに囚われて（悩んで）はいかん。", "note": "concern oneself with...「～について悩む、～に関心を持つ、関与する」。what was「かつてそうであったもの（＝過去）」。"},
+  {"en": "We must act on what is.", "jp": "今ある現実に基づいて行動せねばならん。", "note": "act on...「～に基づいて行動する、作用する」。what is「今現在あるもの（＝現実）」。中級者にとって非常に含蓄のある、名言中の名言です。"},
+  {"en": "But Gyatso, how do I know if I'm ready for this?", "jp": "でもギヤツォ、自分がその準備ができているかどうかって、どうすれば分かるの？", "note": "know if...「～かどうかを知る」。be ready for...「～の準備ができている」。"},
+  {"en": "Your questions will be answered", "jp": "お前の問いに対する答えは得られるだろう、", "note": ""},
+  {"en": "when you're old enough to enter the Air Temple sanctuary.", "jp": "お前が十分に成長して、この空の寺院の「聖域」に入る時にな。", "note": "old enough to [動詞]「～するのに十分に年齢に達している、成長している」。sanctuary「聖域、神聖な場所」。"},
+  {"en": "Inside, you will meet someone who will guide you on your journey.", "jp": "その中でお前は、これからの旅路を導いてくれる「誰か」に出会うはずじゃ。", "note": ""},
+  {"en": "Who is it?", "jp": "それは誰なの？", "note": ""},
+  {"en": "When you are ready, he will reveal himself to you.", "jp": "お前の準備が整った時、その者が自らの姿を現すだろう。", "note": "reveal oneself「（隠れていたものが）自ら姿を現す、正体を明かす」。"},
+  {"en": "Now,", "jp": "さて、", "note": ""},
+  {"en": "are you going to help me with these cakes or not?", "jp": "わしのこのケーキ作りを手伝うのか、それとも手伝わんのか？", "note": "are you going to ... or not?「～するのか、それともしないのか？（どっちなんだ？）」と、決断を促す口語表現。"},
+  {"en": "All right.", "jp": "分かったよ。", "note": ""},
+  {"en": "One...", "jp": "いーち…", "note": ""},
+  {"en": "two... three.", "jp": "にーの…さん！（風でケーキを投げて遊ぶシーン）", "note": ""},
+  {"en": "Your aim has improved greatly, my young pupil.", "jp": "狙い（コントロール）がずいぶんと上達したな、我が若き弟子よ。", "note": "aim「狙い、照準、エイム」。pupil「（特に個人的な指導を受ける）弟子、生徒」。"},
+  {"en": "You must miss him.", "jp": "彼のことが恋しい（寂しい）のね。", "note": "You must [動詞の原形] は、ここでは強い確信を伴う推量「～に違いない、～なはずだ」を表します。miss「～がいなくて寂しく思う」。"},
+  {"en": "Yeah.", "jp": "うん。", "note": ""},
+  {"en": "Where are you going?", "jp": "どこに行くの？", "note": ""},
+  {"en": "The Air Temple sanctuary.", "jp": "空の寺院の「聖域」だよ。", "note": ""},
+  {"en": "There's someone I'm ready to meet.", "jp": "会う準備ができている「誰か」が、あの中にいるんだ。", "note": ""},
+  {"en": "But, Aang, no one could have survived in there for a hundred years.", "jp": "でもアン、誰も100年間もあの場所に生き残っているわけがないわ。", "note": "could have survived「生き残れたかもしれない、生存が可能だった」（否定の no one と合わさることで、「絶対に生き残っているはずがない」という強い懐疑を表します）。"},
+  {"en": "It's not impossible.", "jp": "不可能じゃないよ。", "note": "not impossible「不可能ではない」と二重否定にすることで、強い可能性（自分がそうであったという実例）を主張しています。"},
+  {"en": "I survived in the iceberg for that long.", "jp": "僕だって、氷山の中でそれだけの長い間生き残っていたんだから。", "note": "for that long「そんなに長い間」。"},
+  {"en": "Good point.", "jp": "一理あるな。", "note": "Good point.「確かにそうだ、良い指摘だ」は、相手の意見や反論に納得した時に返すお決まりの口語フレーズ。"},
+  {"en": "Katara, whoever's in there might help me figure out this Avatar thing.", "jp": "カタラ、あの中にいるのが誰であれ、この「アバター」の役割について理解するのを助けてくれるかもしれない。", "note": "whoever...「～する人は誰であっても」。figure out「（困難なことや複雑なことを）解決する、理解する、解き明かす」という中級の必須句動詞。"},
+  {"en": "And whoever's in there might have a medley of delicious cured meats.", "jp": "そしてあの中にいるのが誰であれ、美味しそうな塩漬け肉（保存肉）の詰め合わせを持っているかもしれないな。", "note": "medley of...「～のメドレー、バラエティ豊かな詰め合わせ」。cured meat「（ハムやソーセージなどの）加工保存肉、塩漬け肉」。相変わらず食べ物の心配ばかりするソッカのジョークです。"},
+  {"en": "I don't suppose you have a key?", "jp": "まさか鍵なんて持ってないよな？", "note": "I don't suppose...「まさか～ではないと思うが」。控えめに「～だよね？」と否定的な前提で尋ねる表現。"},
+  {"en": "The key, Sokka, is airbending.", "jp": "鍵はね、ソッカ、エアベンディングなんだ。", "note": ""},
+  {"en": "So, a 12-year-old boy bested you and your firebenders.", "jp": "それで、12歳のガキに、お前と火の国のベンダーたちが負かされた（出し抜かれた）というわけか。", "note": "best（動詞）「（人を）負かす、しのぐ、出し抜く」という、中級の粋な動詞表現。"},
+  {"en": "You're more pathetic than I thought.", "jp": "お前が思っていた以上に「哀れな（情けない）存在」だったということだな。", "note": "pathetic「情けない、哀れな、痛々しい」。ズコのプライドを徹底的に傷つけようとしています。"},
+  {"en": "I underestimated him once, but it will not happen again.", "jp": "奴を見くびったのは一度だけだ。二度と同じことは起きない。", "note": "underestimate「過小評価する、見くびる」。will not happen again「二度と起こらない」（強い意志）。"},
+  {"en": "No, it will not, because you won't have a second chance.", "jp": "ああ、二度と起こらんな。なぜならお前には「2回目のチャンス」などないからだ。", "note": ""},
+  {"en": "Commander Zhao, I've been hunting the Avatar for two years and I--", "jp": "ジャオ指揮官、私は2年間アバターを追い続けてきたんだ、それに私は…", "note": "have been hunting「（過去から現在まで2年間）狩り・追跡を続けている」（現在完了進行形）。"},
+  {"en": "And you failed!", "jp": "そして、お前は失敗したのだ！", "note": ""},
+  {"en": "Capturing the Avatar is too important to leave in a teenager's hands.", "jp": "アバターの捕獲は、ただのティーンエイジャー（若造）の手に委ねるには重要すぎる任務なのだ。", "note": "too [形容詞] to [動詞]「～するには…すぎる、あまりに～なので…できない」。leave in someone's hands「（任務や処置を）～の手、管理に委ねる、任せる」。"},
+  {"en": "He's mine now.", "jp": "奴は、今や私の獲物だ。", "note": ""},
+  {"en": "Keep them here.", "jp": "（ズコたちを）ここに留めておけ（拘束しろ）。", "note": ""},
+  {"en": "More tea, please.", "jp": "お茶のおかわりをいただけますかな。", "note": "一触即発の重苦しい雰囲気の中で、空気を読まずに（あるいはワザと）お茶を頼むアイローのユーモア。"},
+  {"en": "Statues?", "jp": "彫像ばかりか？", "note": ""},
+  {"en": "That's it?", "jp": "これだけかよ？", "note": "That's it?「それだけ？ 以上？」は、期待していたものがあっけなかったり、少なかったりした時に不満そうに言う定番フレーズ。"},
+  {"en": "Where's the meat?", "jp": "肉はどこだよ？", "note": ""},
+  {"en": "-Who are all these people? -I'm not sure.", "jp": "- この人たちはみんな誰なの？ - よく分からないんだ。", "note": ""},
+  {"en": "But it feels like I know them somehow. Look! That one's an airbender.", "jp": "でも、どういうわけか彼らを知っているような気がするんだ。見て！ あの像はエアベンダーだよ。", "note": "feel like...「～のような気がする、～のように感じられる」。somehow「どういうわけか、何となく」。"},
+  {"en": "And this one's a waterbender. They're lined up in a pattern.", "jp": "そしてこの像はウォーターベンダーね。一定のパターンで一列に並んでいるわ。", "note": "be lined up「一列に並んでいる」。in a pattern「規則的に、パターンに従って」。"},
+  {"en": "Air, water, earth, and fire.", "jp": "気（空気）、水、土、そして火。", "note": ""},
+  {"en": "That's the Avatar cycle.", "jp": "それはアバターの「サイクル（輪廻転生の周期）」だな。", "note": ""},
+  {"en": "Of course.", "jp": "そういうことね（納得）。", "note": ""},
+  {"en": "They're Avatars.", "jp": "彼らはみんなアバターなのよ。", "note": ""},
+  {"en": "All these people are your past lives, Aang.", "jp": "ここにいるすべての人たちが、あなたの「過去世（前世）」なのよ、アン。", "note": "past lives「前世、過去世」（past life の複数形）。アバターが何世代にもわたって世界に生まれ変わってきた歴史を実感する瞬間。"},
+  {"en": "Wow.", "jp": "うわぁ。", "note": ""},
+  {"en": "There are so many.", "jp": "こんなにたくさんいるんだ。", "note": ""},
+  {"en": "Past lives? Katara, you really believe in that stuff?", "jp": "前世だって？ カタラ、お前本気でそんなオカルト（話）を信じてるのか？", "note": "believe in...「（存在や価値、宗教的なものを）心から信じる」（単なる believe よりも信仰や信念に近い信頼）。that stuff「そういうもの、そんな話（やや軽蔑を込めて）」。"},
+  {"en": "It's true.", "jp": "本当のことよ。", "note": ""},
+  {"en": "When the Avatar dies, he's reincarnated into the next nation in the cycle.", "jp": "アバターが死ぬと、彼はサイクルに沿って「次の国」に生まれ変わる（転生する）のよ。", "note": "be reincarnated into...「～に生まれ変わる、転生する」という宗教的・ファンタジー的な表現。"},
+  {"en": "Aang, snap out of it.", "jp": "アン、しっかりして（正気に戻って）。", "note": "snap out of it は、ぼーっと考え込んでいたり、パニックになったり、落ち込んでいる人に対して「目を覚ませ、しっかりしろ、切り替えろ」と促す日常の超重要フレーズ。"},
+  {"en": "Who is that?", "jp": "あれは誰？", "note": ""},
+  {"en": "That's Avatar Roku, the Avatar before me.", "jp": "あれはアバター・ロク。僕の前の代のアバターだよ。", "note": ""},
+  {"en": "You were a firebender?", "jp": "お前の前世は「火の国のベンダー」だったのか？", "note": ""},
+  {"en": "No wonder I didn't trust you when we first met.", "jp": "どうりで、最初に出会ったときに俺がお前を信用できなかったわけだ。", "note": "No wonder...（Part 3にも登場した頻出表現）を用いて、冗談めかしてソッカが言っています。"},
+  {"en": "There's no writing. How do you know his name?", "jp": "文字（名前の刻印）はどこにも書かれていないわ。どうして彼の名前が分かるの？", "note": "There's no writing.「何も書かれていない」。"},
+  {"en": "I'm not sure.", "jp": "はっきりとは分からない。", "note": ""},
+  {"en": "I just know it somehow.", "jp": "ただ、何となく（魂が）知っているんだ。", "note": ""},
+  {"en": "You just couldn't get any weirder.", "jp": "お前はこれ以上「不気味（奇妙）」になりようがないな（これ以上おかしな奴にはなれないな）。", "note": "can't get any + 比較級 は「これ以上～になり得ない（＝今がすでに限界、最大だ）」という意味。weird「奇妙な、不気味な、変わった」。ソッカならではの呆れた、しかし親しみの込もった突っ込みです。"},
+  {"en": "Firebender. Nobody make a sound.", "jp": "火の国のベンダーだ。誰も声を出すな（音を立てるな）。", "note": "Nobody make... の make は、三人称単数現在形（makes）ではなく原形になっており、強い「命令・懇願」のニュアンスを含んだ「誰も～するな！」という表現。"},
+  {"en": "You're making a sound.", "jp": "あなたが声を（音を）立ててるわよ。", "note": "大きな声で注意するソッカへのカタラの冷静なツッ込み。"},
+  {"en": "That firebender won't know what hit him.", "jp": "あの火の国のベンダーめ、何に襲われた（何が当たった）のかも分からんようにしてやる。", "note": "won't know what hit him「何が自分を襲ったのか分からないだろう」は、不意打ちや圧倒的な攻撃で相手をコテンパンにする際の非常にポピュラーな決まり文句。"},
+  {"en": "-Lemur! -Dinner.", "jp": "- （アン）キツネザルだ！ - （ソッカ）晩飯（ディナー）だ！", "note": "lemur「キツネザル」。お腹が空きすぎて、可愛いキツネザルを食べ物に見立てて追いかけるソッカ。"},
+  {"en": "Don't listen to him. You're gonna be my new pet.", "jp": "あいつの言うことなんて聞いちゃダメだよ。君は僕の新しいペットになるんだ。", "note": "Don't listen to...「～の言うことを聞くな」。"},
+  {"en": "Not if I get him first!", "jp": "俺が先に捕まえさえすれば、そうはさせんぞ！", "note": "Not if...「～なら話は別だ、～されるくらいならそうさせない」。ここでは「俺が先に捕まえればペットになんかさせない（食ってやる）」という意味。"},
+  {"en": "Wait! Come back!", "jp": "待て！ 戻ってこい！", "note": ""},
+  {"en": "I wanna eat you!", "jp": "お前を食べたいんだ！（※大真面目に追いかけるソッカ）", "note": ""},
+  {"en": "Hey, no fair!", "jp": "おい、ずるいぞ！（※風を使って追いつくアンに対して）", "note": "No fair!「ずるい！ 不公平だ！」は、ゲームや日常生活で子供（あるいは大人も子供っぽく）がずるをされた時に叫ぶ大定番フレーズ。"},
+  {"en": "My search party is ready. Once I'm out to sea,", "jp": "私の捜索隊の準備が整った。私が海へ出たらすぐに、", "note": "search party「捜索隊、捜索チーム」。be out to sea「海に出る、航海に出る」。"},
+  {"en": "my guards will escort you back to your ship, and you'll be free to go.", "jp": "私の護衛兵がお前たちを船まで送り届ける。そうすればお前たちは自由に立ち去ってよいぞ。", "note": "escort [人] back「（人を）送り届ける、護送する」。be free to go「自由に立ち去ってよい、釈放される」。"},
+  {"en": "Why? Are you worried I'm going to try and stop you?", "jp": "なぜだ？ 私が邪魔を（阻止しようと）企てるとでも心配しているのか？", "note": "try and [動詞]（＝try to [動詞]）は、口語で非常によく使われる「～しようと試みる、頑張って～する」という表現。"},
+  {"en": "You? Stop me? Impossible.", "jp": "お前が？ 私を止めるだと？ 不可能（あり得ん）な話だ。", "note": ""},
+  {"en": "Don't underestimate me, Zhao. I will capture the Avatar before you.", "jp": "私を見くびるなよ、ジャオ。お前よりも先に、私が必ずアバターを捕らえてみせる。", "note": "before you「お前より前に、先んじて」。ズコの激しい闘志。"},
+  {"en": "Prince Zuko, that's enough!", "jp": "ズコ王子、もうそのくらいにしなさい！", "note": ""},
+  {"en": "You can't compete with me.", "jp": "お前が私と競い合えるわけがない。", "note": "compete with...「～と競う、競争する」。"},
+  {"en": "I have hundreds of warships under my command, and you...", "jp": "私は何百もの軍艦を指揮下に置いているが、お前は…", "note": "under my command「私の指揮下に、支配下に」。"},
+  {"en": "You're just a banished prince.", "jp": "お前は、ただの「追放された王子」にすぎん。", "note": "banished「追放された」。ズコが最も触れられたくない、かつ動かしがたい現実的な痛いところを突いています。"},
+  {"en": "No home, no allies.", "jp": "故郷もなく、同盟者（味方）もいない。", "note": "allies（ally「同盟者、味方」の複数形）。"},
+  {"en": "Your own father doesn't even want you.", "jp": "実の父親（火祖）からさえ、必要とされて（愛されて）いないのだ。", "note": "not even...「～でさえ～ない」。ジャオの言葉は非常に残酷で、ズコの心を抉ります。"},
+  {"en": "You're wrong!", "jp": "お前は間違っている！（そんなことはない！）", "note": ""},
+  {"en": "Once I deliver the Avatar to my father, he will welcome me home with honor,", "jp": "私がアバターを父上に引き渡せば、父上は私を栄誉（名誉）と共に我が家へ迎えてくださる。", "note": "deliver [人] to...「（人を）引き渡す、送り届ける」。welcome [人] home with honor「栄誉をもって歓迎して家に迎え入れる」。"},
+  {"en": "and restore my rightful place on the throne.", "jp": "そして、王位（玉座）における私の正当な地位を回復してくださるのだ。", "note": "restore「（失われたものを）修復する、回復させる、元の状態に戻す」。rightful place on the throne「王座における正当な、本来あるべき地位」。"},
+  {"en": "If your father really wanted you home, he would have let you return by now,", "jp": "もしお前の父親が、本当にお前に帰ってきてほしいと思っているなら、今頃すでに帰国を許しているはずだ。", "note": "would have let you return は仮定法過去完了の帰結節。過去の事実（実際には帰国を許していないこと）と反対の仮定「～していただろうに」を表します。"},
+  {"en": "Avatar or no Avatar.", "jp": "アバターがいようがいまいがな。", "note": "[A] or no [A]「Aがあろうとなかろうと、Aの有無にかかわらず」。"},
+  {"en": "But in his eyes, you are a failure and a disgrace to the Fire Nation.", "jp": "だが父上の目（主観）から見れば、お前はただの「落ちこぼれ（失敗作）」であり、火の国の「恥」なのだ。", "note": "in one's eyes「（人の）見解では、主観的には」。disgrace to...「～にとっての恥、不名誉」。"},
+  {"en": "That's not true.", "jp": "それは違う！（嘘だ！）", "note": ""},
+  {"en": "You have the scar to prove it.", "jp": "その（顔の）傷跡が、何よりの証拠ではないか。", "note": "have [何か] to prove it「それを証明するための～を持っている（＝～がそれを証明している）」。ズコの左目の大きな火傷の傷（scar）を指しています。"},
+  {"en": "Maybe you'd like one to match!", "jp": "お前にも、それとお揃いの傷を作ってやろうか！", "note": "Maybe you would like one to match「（私と同じように）マッチする傷跡を一つお前も欲しがっているかもしれないな」という、激怒したズコの挑戦的な比喩表現。"},
+  {"en": "Is that a challenge?", "jp": "それは私への「決闘の申し込み（挑戦）」かね？", "note": "challenge「挑戦、異議申し立て、決闘の申し込み」。"},
+  {"en": "An Agni Kai, at sunset.", "jp": "アグニ・カイだ。日没に行う。", "note": "Agni Kai（アグニ・カイ）は火の国の伝統的な「火の決闘」。"},
+  {"en": "Very well.", "jp": "いいだろう（承知した）。", "note": "Very well.「結構だ、承知した」と、相手の提案を受け入れるフォーマルまたは突き放した口語表現。"},
+  {"en": "It's a shame your father won't be here to watch me humiliate you.", "jp": "お前が私に辱められる（恥をかかされる）姿を、父親が見物に来られないのが実に残念だな。", "note": "It's a shame (that)...「～なのは残念だ、気の毒だ」（shame は恥という意味だけでなく「残念な事柄」を指します）。humiliate「（人に）屈辱を与える、ひどく恥をかかせる」。"},
+  {"en": "I guess your uncle will do.", "jp": "代わりに、お前の叔父上が見届け人として十分だろう。", "note": "will do「（代用として）役に立つ、十分である、間に合う」という非常に重要度の高い中級イディオム。（例：This towel will do.＝このタオルで十分だ。）"},
+  {"en": "Prince Zuko, have you forgotten what happened last time you dueled a master?", "jp": "ズコ王子、マスター（達人）と最後に決闘した時に何が起きたか、まさかお忘れではあるまいな？", "note": "last time you dueled...「最後にあなたが～と決闘した時」（duel「決闘する」）。ズコの傷の原因となった過去の凄惨な出来事を案じるアイロー。"},
+  {"en": "I will never forget.", "jp": "決して、忘れはしない。", "note": ""},
+  {"en": "Hey, come back!", "jp": "ねえ、戻ってきて！", "note": ""},
+  {"en": "Come on out, little lemur.", "jp": "出ておいで、小さなキツネザルくん。", "note": "Come on out「外に出ておいで」。"},
+  {"en": "That hungry guy won't bother you anymore.", "jp": "あの腹ペコの奴（ソッカ）は、もう君の邪魔をしない（悪さをしない）からね。", "note": "bother「（人を）悩ませる、邪魔をする、困らせる」。not... anymore「もう二度と～しない」。"},
+  {"en": "Firebenders?", "jp": "火の国のベンダーたち？（周囲に散らばる兜を見つけて）", "note": ""},
+  {"en": "They were here?", "jp": "彼らが、ここにいたの…？（ついに真実を悟るアン）", "note": ""},
+  {"en": "Gyatso.", "jp": "ギヤツォ…（師の亡骸の前に跪き、絶望します）", "note": ""},
+  {"en": "Hey, Aang, you find my dinner yet?", "jp": "おい、アン、俺の晩飯はもう見つかったか？", "note": "find ... yet?「もう～を見つけたか？」の口語的な省略表現。アンの絶望を知らずに明るく現れるソッカ。"},
+  {"en": "Aang, I wasn't really gonna eat the lemur, okay?", "jp": "アン、俺本気でキツネザルを食おうとしてたわけじゃないからな、いいか？", "note": "was not really gonna「本気で～するつもりではなかった」。アンが黙り込んでいるのを、自分がモモを食べようとしたことで怒っていると勘違いしています。"},
+  {"en": "Oh, man.", "jp": "なんてことだ…（ギヤツォの遺骸に気づいて絶句します）。", "note": ""},
+  {"en": "Come on, Aang. Everything will be all right.", "jp": "行こう、アン。きっとすべて上手くいくから（大丈夫だから）。", "note": "ソッカはアンの肩に優しく手を置き、寄り添おうとします。"},
+  {"en": "Let's get out of here.", "jp": "ここから出よう。", "note": "get out of here「ここから立ち去る、脱出する」。"},
+  {"en": "Aang.", "jp": "アン…（異変に気づいて駆け寄るカタラ）", "note": ""},
+  {"en": "Send word to the Fire Lord immediately. The Avatar has returned.", "jp": "直ちに火の国の王に知らせを送れ。アバターが帰ってきたとな。", "note": "（決闘の直前、光を放つアンのエネルギーを遠くに見てジャオが放ったセリフ）Send word to...「～に知らせ（メッセージ）を送る、一報を伝える」。"},
+  {"en": "Aang, come on! Snap out of it!", "jp": "アン、お願いだから！ 正気に戻って！（目を覚まして！）", "note": "（アバターステイトで暴走するアンに向けて）Snap out of it!（Part 6に続き、カタラが命がけで呼びかけています）。"},
+  {"en": "What happened?", "jp": "一体何が起きたんだ？", "note": ""},
+  {"en": "He found out firebenders killed Gyatso.", "jp": "火の国のベンダーたちがギヤツォを殺したのを、彼が知ってしまったのよ。", "note": ""},
+  {"en": "Oh, no! It's his Avatar spirit.", "jp": "なんてこった！ あれはあいつの「アバター・スピリット（精神）」か。", "note": ""},
+  {"en": "He'm've triggered it. I'm gonna try and calm him down.", "jp": "彼の怒りが引き金になってしまった（トリガーを引いてしまった）に違いないわ。私が彼を落ち着かせてみる。", "note": "He must have triggered it.「彼がそれを引き起こしたに違いない」（字幕では He'm've となっており、話者の素早い発音をそのまま書き起こした超中級短縮形）。calm [人] down「（興奮した人を）落ち着かせる」。"},
+  {"en": "Well, do it, before he blows us off the mountain!", "jp": "ああ、やってくれ！ あいつが俺たちをこの山から吹き飛ばしてしまう前にな！", "note": "blow [人] off...「（強風などで人を）～から吹き飛ばす」。"},
+  {"en": "Remember your firebending basics, Prince Zuko.", "jp": "火のベンディングの基本を忘れるな、ズコ王子。", "note": ""},
+  {"en": "They are your greatest weapons.", "jp": "それら基本こそが、お前の最大の武器なのだから。", "note": ""},
+  {"en": "I refuse to let him win.", "jp": "奴に勝たせるなど、私は絶対に認めん（絶対に拒否する）。", "note": "refuse to [動詞の原形]「～することを断固として拒否する」。let [人] win「（人に）勝利を譲る、勝たせる」。"},
+  {"en": "This will be over quickly.", "jp": "こんな戦い、すぐに終わらせてやろう。", "note": "be over「終わる、完了する」。"},
+  {"en": "Basics, Zuko!", "jp": "基本だ、ズコ！（※決闘の劣勢時にアドバイスを飛ばします）", "note": ""},
+  {"en": "Break his root!", "jp": "奴の「根（足元、重心）」を崩すのじゃ！", "note": "Break one's root は格闘技やベンディングにおいて「相手の重心や立ち位置の基本を崩す、足を払う」ことを意味する表現。"},
+  {"en": "Do it!", "jp": "やれよ！（※形勢逆転し、ジャオを圧倒して最後のトドメを刺すように促されたズコが、威嚇の炎だけを放ったシーン）", "note": ""},
+  {"en": "That's it?", "jp": "それだけか？", "note": ""},
+  {"en": "Your father raised a coward.", "jp": "お前の父親は、「臆病者」を育て上げたようだな。", "note": "raise「（子供を）育てる、育み育てる」。coward「臆病者、腰抜け」。自分を焼き殺さなかったズコを侮辱しています。"},
+  {"en": "Next time you get in my way, I promise I won't hold back.", "jp": "次に私の邪魔をするなら、約束する、二度と手加減（容赦）はしない。", "note": "get in my way「私の進路を塞ぐ、邪魔をする」。hold back「（感情や力を）抑える、手加減する、控える」という日常必須の中級句動詞。"},
+  {"en": "No, Prince Zuko! Do not taint your victory.", "jp": "いかん、ズコ王子！ せっかくの勝利を「汚して（台無しに）」してはなりませぬ。", "note": "taint「（名誉や品質を）汚す、傷つける、台無しにする」。手加減されたジャオがズコの背後から卑怯な闇討ちを仕掛けようとした際、アイローがそれを阻止してズコを制止した美しいシーン。"},
+  {"en": "So this is how the great Commander Zhao acts in defeat?", "jp": "ふむ、これが「偉大なるジャオ指揮官」の、敗北時の振る舞い（あがき）ですかな？", "note": "So this is how...「なるほど、これが～のやり方（振る舞い）というわけですか」。act in defeat「敗北の中で振る舞う」。"},
+  {"en": "Disgraceful.", "jp": "実に見苦しい（見下げ果てた行為ですな）。", "note": "disgraceful「恥ずべき、見苦しい、不名誉な」。"},
+  {"en": "Even in exile, my nephew is more honorable than you.", "jp": "追放（流刑）の身にあるとはいえ、私の甥（ズコ）の方がお前よりも遥かに誇り高く、気高い。", "note": "exile「追放、亡命、流刑」。honorable「名誉ある、誇り高い、誠実な」。"},
+  {"en": "Thanks again for the tea.", "jp": "お茶を、改めてご馳走さまでした。", "note": ""},
+  {"en": "It was delicious.", "jp": "大変美味しゅうございました。", "note": ""},
+  {"en": "Did you really mean that, Uncle?", "jp": "叔父上、今の言葉（私の方が誇り高いということ）は、本気で言ってくださったのですか？", "note": "mean「～を本気で言う、意図する」。叔父の優しい言葉に、少し嬉しそうにするズコ。"},
+  {"en": "Of course. I told you ginseng tea is my favorite.", "jp": "もちろんですとも。高麗人参のお茶が私の大好物だと申し上げたでしょう。", "note": "叔父はあえてはぐらかし、お茶の話にすり替えて優しく微笑んでいます。"},
+  {"en": "Aang, I know you're upset.", "jp": "アン、あなたがひどく動揺して、悲しんでいるのは分かっているわ。", "note": "upset「（怒りや悲しみで）動揺している、取り乱している」。"},
+  {"en": "And I know how hard it is to lose the people you love.", "jp": "そして、愛する人たちを失うことが、どれほどつらいことかも。", "note": "lose the people you love「愛する人々を失う」。"},
+  {"en": "I went through the same thing when I lost my mom.", "jp": "私も、お母さんを失った時に全く同じ経験（同じつらさ）を通ってきたのよ。", "note": "go through「（困難や辛い経験を）経験する、経る、通り抜ける」という、人生の試練を語る時の超重要句動詞。"},
+  {"en": "Monk Gyatso and the other airbenders may be gone,", "jp": "ギヤツォ師や他のエアベンダーたちは、もういなくなってしまったかもしれない。", "note": ""},
+  {"en": "but you still have a family.", "jp": "でもね、あなたにはまだ「家族」がいるわ。", "note": ""},
+  {"en": "Sokka and I, we're your family now.", "jp": "私とソッカ、私たちが今、あなたの新しい家族よ。", "note": "アンを孤独から救い出す、カタラの温かい絆の言葉です。"},
+  {"en": "Katara and I aren't gonna let anything happen to you, promise.", "jp": "カタラと俺は、お前に指一本（悪いことなど何一つ）触れさせやしないさ。約束する。", "note": "not let anything happen to [人]「（人に）何事も起きさせない、必ず守る」という、絶対の安全を保障する時の強い決意表現。ソッカの男らしさが詰まっています。"},
+  {"en": "I'm sorry.", "jp": "ごめんね（※我に返り、暴走を謝るアン）。", "note": ""},
+  {"en": "It's okay. It wasn't your fault.", "jp": "いいのよ。あなたのせいじゃないわ。", "note": ""},
+  {"en": "But you were right. And if firebenders found this temple,", "jp": "でも、君の言う通りだった。もし火の国のベンダーたちがこの寺を見つけたなら、", "note": ""},
+  {"en": "that means they found the other ones, too.", "jp": "それは、彼らが他の（東、西、北の）寺院もすべて見つけてしまったということだね。", "note": ""},
+  {"en": "I really am the last airbender.", "jp": "僕は本当に、「最後のエアベンダー」なんだ。", "note": "the last airbender（タイトルの伏線回収）。自分がたった一人、世界に残されたエアベンダーである過酷な現実を受け入れたセリフです。"},
+  {"en": "Everything's packed. You ready to go?", "jp": "荷物は全部まとめたぞ。出発の準備はいいか？", "note": "Everything is packed.「荷造りはすべて完了した」。You ready to go?「出発する準備はいいか？」（Are you が省略されています）。"},
+  {"en": "How is Roku supposed to help me if I can't talk to him?", "jp": "もしロク（前世のアバター）と話すこともできないなら、彼は一体どうやって僕を助けてくれるっていうんだろう？", "note": "be supposed to [動詞の原形]「（決まりや前提として）〜することになっている、〜するはずだ」。「彼が僕を助けることになっているのに、話せないならどうやって助けてくれるんだ」という困惑。"},
+  {"en": "Maybe you'll find a way.", "jp": "きっと何か方法が見つかるわよ。", "note": ""},
+  {"en": "Looks like you made a new friend, Sokka.", "jp": "新しいお友達ができたみたいね、ソッカ。", "note": "make a friend「友達を作る、仲良くなる」。"},
+  {"en": "Can't talk. Must eat.", "jp": "喋れない。とにかく食べなきゃ。（※モモから食べ物を貰って夢中で貪るソッカ）", "note": ""},
+  {"en": "Hey, little guy.", "jp": "やあ、ちびっこくん。", "note": ""},
+  {"en": "You, me, and Appa,", "jp": "君と、僕と、アッパ。", "note": ""},
+  {"en": "we're all that's left of this place. We have to stick together.", "jp": "僕たちが、この場所の「残されたすべて」なんだ。お互いに助け合って、一緒にいなきゃね。", "note": "all that's left of...「～に残されたすべて」。stick together「（困難な時に）一致団結する、お互いに離れずに協力し合う」という、友情や家族の絆を確認する日常の超重要句動詞。"},
+  {"en": "Katara, Sokka,", "jp": "カタラ、ソッカ、", "note": ""},
+  {"en": "say hello to the newest member of our family.", "jp": "私たちの家族の、一番新しいメンバーに挨拶してよ。", "note": "say hello to...「～に挨拶する、～によろしく言う」。newest member of our family「家族の最新の（新しい）一員」。"},
+  {"en": "What are you gonna name him?", "jp": "なんて名前をつけるの？", "note": "What are you going to name him?「彼をなんと名付けるつもり？」。"},
+  {"en": "Momo.", "jp": "「モモ」だよ。（※モモは日本語の「桃」や、作中の鳴き声に由来。こうして新しい冒険が始まります）", "note": ""}
+ ];
+ 
+// --- 状態管理 ---
+ const savedStates = localStorage.getItem('avatar_audio_states_ch3');
+ 
+let cardStates = savedStates ? JSON.parse(savedStates) : cardsData.map(() => ({
+ isCorrect: false,
+ lastAnsweredDate: null
+ }));
+
+ let displayIndices = cardsData.map((_, i) => i);
+ let currentDisplayIndex = 0;
+ 
+let correctCount = cardStates.filter(state => state.isCorrect).length;
+ 
+let isFront = true;
+ let isFilterMode = false;
+
+ // --- DOM要素 ---
+ const frontSide = document.getElementById('front-side');
+ const backSide = document.getElementById('back-side');
+ const engContent = document.getElementById('eng-content');
+ const japContent = document.getElementById('jap-content');
+ const noteContent = document.getElementById('note-content');
+ 
+const controlsFront = document.getElementById('controls-front');
+ const controlsBack = document.getElementById('controls-back');
+ const progressText = document.getElementById('progress-text');
+ const scoreText = document.getElementById('score-text');
+ const playBtn = document.getElementById('play-audio-btn');
+ const prevBtn = document.getElementById('prev-btn');
+ const modeBtn = document.getElementById('mode-btn');
+ const lastDateText = document.getElementById('last-date-text');
+
+ function saveProgress() {
+ localStorage.setItem('avatar_audio_states_ch3', JSON.stringify(cardStates));
+ }
+
+ // --- UIの更新 ---
+ function updateUI() {
+ if (displayIndices.length === 0) return;
+
+ const originalIndex = displayIndices[currentDisplayIndex];
+ const card = cardsData[originalIndex];
+ const state = cardStates[originalIndex];
+
+ progressText.textContent = `${currentDisplayIndex + 1} / ${displayIndices.length}`;
+ scoreText.textContent = `正解数: ${correctCount} / ${cardsData.length}`;
+ 
+prevBtn.disabled = (currentDisplayIndex === 0);
+
+ if (isFront) {
+ frontSide.style.display = 'flex';
+ backSide.style.display = 'none';
+ controlsFront.style.display = 'flex';
+ controlsBack.style.display = 'none';
+ 
+if (state.lastAnsweredDate) {
+ lastDateText.textContent = `最終回答日: ${state.lastAnsweredDate}`;
+ } else {
+ lastDateText.textContent = "最終回答日: 未回答";
+ }
+ } else {
+ frontSide.style.display = 'none';
+ backSide.style.display = 'block';
+ controlsFront.style.display = 'none';
+ controlsBack.style.display = 'flex';
+ }
+
+ engContent.textContent = card.en;
+ japContent.textContent = card.jp;
+ noteContent.textContent = card.note ? "💡 " + card.note : "";
+ }
+
+ // --- アクション ---
+ function flipCard() {
+ isFront = !isFront;
+ updateUI();
+ }
+
+ function nextCard() {
+ if (currentDisplayIndex < displayIndices.length - 1) {
+ currentDisplayIndex++;
+ } else {
+ if (isFilterMode) {
+ refreshFilterIndices();
+ if (displayIndices.length === 0) return;
+ }
+ currentDisplayIndex = 0;
+ }
+ isFront = true;
+ updateUI();
+ }
+
+ function prevCard() {
+ if (currentDisplayIndex > 0) {
+ currentDisplayIndex--;
+ isFront = true;
+ updateUI();
+ }
+ }
+
+ function goToFirst() {
+ currentDisplayIndex = 0;
+ isFront = true;
+ updateUI();
+ }
+
+ // --- 日付の記録 ---
+ function getTodayFormatted() {
+ const today = new Date();
+ const y = today.getFullYear();
+ const m = String(today.getMonth() + 1).padStart(2, '0');
+ const d = String(today.getDate()).padStart(2, '0');
+ return `${y}/${m}/${d}`;
+ }
+
+ function recordDate(index) {
+ cardStates[index].lastAnsweredDate = getTodayFormatted();
+ }
+
+ // --- 正解・不正解の評価 ---
+ function markCorrect() {
+ const originalIndex = displayIndices[currentDisplayIndex];
+ 
+if (!cardStates[originalIndex].isCorrect) {
+ cardStates[originalIndex].isCorrect = true;
+ correctCount++;
+ }
+ 
+recordDate(originalIndex);
+ saveProgress();
+ nextCard();
+ }
+
+ function markIncorrect() {
+ const originalIndex = displayIndices[currentDisplayIndex];
+ 
+if (cardStates[originalIndex].isCorrect) {
+ cardStates[originalIndex].isCorrect = false;
+ correctCount--;
+ }
+ 
+recordDate(originalIndex);
+ saveProgress();
+ nextCard();
+ }
+
+ // --- モード切替とフィルター処理 ---
+ function toggleFilterMode() {
+ isFilterMode = !isFilterMode;
+ 
+if (isFilterMode) {
+ refreshFilterIndices();
+ } else {
+ displayIndices = cardsData.map((_, i) => i);
+ modeBtn.textContent = "全問モード中 (タップで未正解のみ)";
+ modeBtn.style.backgroundColor = "#edf2f7";
+ currentDisplayIndex = 0;
+ isFront = true;
+ updateUI();
+ }
+ }
+
+ function refreshFilterIndices() {
+ const uncorrectIndices = cardStates
+ .map((state, index) => state.isCorrect ? -1 : index)
+ .filter(index => index !== -1);
+ 
+if (uncorrectIndices.length === 0) {
+ alert("すごい！全てのカードに正解しているから、全問モードに戻すね。");
+ isFilterMode = false;
+ displayIndices = cardsData.map((_, i) => i);
+ modeBtn.textContent = "全問モード中 (タップで未正解のみ)";
+ modeBtn.style.backgroundColor = "#edf2f7";
+ } else {
+ displayIndices = uncorrectIndices;
+ modeBtn.textContent = "未正解モード中 (タップで全問)";
+ modeBtn.style.backgroundColor = "#fefcbf";
+ }
+ 
+currentDisplayIndex = 0;
+ isFront = true;
+ updateUI();
+ }
+
+ // --- 音声再生 ---
+ function speakText() {
+ const originalIndex = displayIndices[currentDisplayIndex];
+ const textToSpeak = cardsData[originalIndex].en;
+ 
+window.speechSynthesis.cancel();
+ const utterance = new SpeechSynthesisUtterance(textToSpeak);
+ utterance.lang = 'en-US';
+ utterance.rate = 0.9;
+ window.speechSynthesis.speak(utterance);
+ }
+
+ playBtn.addEventListener('click', speakText);
+
+ // 初期化実行
+ updateUI();
+ </script>
+</body>
+</html>
